@@ -77,7 +77,7 @@ The following tools were used in the construction of the project:
 
 ## Author
 
-<a href="https://www.linkedin.com/in/evelinsteiger/">
+<a href="https://www.linkedin.com/in/mauro-de-bruyn-573a8a232/">
  <img style="border-radius: 50%;" src="https://www.linkedin.com/in/mauro-de-bruyn-573a8a232/" width="70px;" alt="Mauro De Bruyn"/>
  <br />
  <p><b>Mauro De Bryn</b></p></a>
