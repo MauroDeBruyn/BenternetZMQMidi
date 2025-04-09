@@ -26,29 +26,28 @@ int main( int argc, char *argv[] )
         nzmqt::ZMQSocket *subscriber = context->createSocket( nzmqt::ZMQSocket::TYP_SUB, context );
         subscriber->connectTo( "tcp://benternet.pxl-ea-ict.be:24042" );
 
-        // Subscribe to the topic "example>quest!>"
+        //Subscribe to the topic "MIDISignal"
         subscriber->subscribeTo("MIDISignal");
 
-        // Check connections
+        //Check connections
         if (!pusher->isConnected() || !subscriber->isConnected()) {
             std::cerr << "NOT CONNECTED !!!" << std::endl;
             return 1;
         }
 
-        // Get MIDI Input
-        //QTextStream inputStream(stdin);
-        //QString name = "MIDI Signal";
-        // Send Midi input
-        //QString messageToSend = "example>quest?>" + MIDI + ">";
-        // Custom message
-        QString messageToSend = "D3Note>Midi>";
+        //Insert Logic to detect midi input
 
-        // Send the message with PUSH socket
+        //Create MIDI input message
+        QString MIDINote;
+        MIDINote = "D3";
+        QString messageToSend = "MIDISignal>" + MIDINote + ">APCMini>";
+
+        //Send the message with PUSH socket
         nzmqt::ZMQMessage message(messageToSend.toUtf8());
         pusher->sendMessage(message);
         std::cout << "Sent: " << messageToSend.toStdString() << std::endl;
 
-        // Receive the response from SUB socket (non-blocking approach using event loop)
+        //Receive the response from SUB socket (non-blocking approach using event loop)
         QThread *listenerThread = QThread::create([subscriber]() {
             while (true) {
                 try {
@@ -63,10 +62,10 @@ int main( int argc, char *argv[] )
             }
         });
 
-        // Start the listener thread to receive messages
+        //Start the listener thread to receive messages
         listenerThread->start();
 
-        // Start the event loop
+        //Start the event loop
         return app.exec();
 
     } catch (nzmqt::ZMQException &ex) {
