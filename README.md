@@ -39,6 +39,9 @@ PROJECT - This is a project for controlling visuals over a long distance using b
 ---
 
 ## To Do
+<h1 align="center">
+    <img alt="" title="#To Do" src="./images/midiMap.png" />
+</h1>
 
 - [ ] Client midi input
 - [ ] Server
