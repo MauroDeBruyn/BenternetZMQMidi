@@ -11,3 +11,8 @@ HEADERS += RtMidi.h
 QT += core
 CONFIG += console c++11
 CONFIG -= app_bundle
+
+QT += core gui widgets network
+CONFIG += c++11
+INCLUDEPATH += path/to/nzmqt/include
+LIBS += -Lpath/to/nzmqt/lib -lnzmqt

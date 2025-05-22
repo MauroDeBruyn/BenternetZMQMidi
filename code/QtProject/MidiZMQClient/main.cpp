@@ -1,125 +1,86 @@
-#include <iostream>
-#include <thread>
-#include <atomic>
+#include <QApplication>
+#include <QMainWindow>
+#include <QVBoxLayout>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QTextEdit>
 #include <nzmqt/nzmqt.hpp>
-#include <nzmqt/impl.hpp>
-#include <QCoreApplication>
-#include <QString>
-#include <QObject>
 
-// Helper class: leest user input op aparte thread en signaleert naar Qt
-class InputReader : public QObject
-{
-    Q_OBJECT
-public:
-    explicit InputReader(QObject *parent = nullptr) : QObject(parent), m_stop(false) {}
-
-    void start()
-    {
-        m_thread = std::thread([this]() {
-            while (!m_stop.load()) {
-                std::cout << "Enter MIDI note (e.g. D3): " << std::flush;
-                std::string line;
-                if (!std::getline(std::cin, line)) {
-                    emit inputReceived(QString());
-                    break;
-                }
-                emit inputReceived(QString::fromStdString(line));
-            }
-        });
-    }
-
-    void stop()
-    {
-        m_stop.store(true);
-        if (m_thread.joinable())
-            m_thread.join();
-    }
-
-signals:
-    void inputReceived(const QString &input);
-
-private:
-    std::thread m_thread;
-    std::atomic<bool> m_stop;
-};
-
-// Main client class: verstuurt MIDI input en ontvangt response via ZeroMQ
-class MidiClient : public QObject
+class MidiClientGUI : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MidiClient(nzmqt::ZMQSocket *pusher, nzmqt::ZMQSocket *subscriber, QObject *parent = nullptr)
-        : QObject(parent), m_pusher(pusher), m_subscriber(subscriber)
+    MidiClientGUI(QWidget *parent = nullptr)
+        : QMainWindow(parent), m_context(nzmqt::createDefaultContext(this))
     {
-        connect(m_subscriber, &nzmqt::ZMQSocket::messageReceived,
-                this, &MidiClient::onMessageReceived);
+        // Setup GUI
+        auto *widget = new QWidget(this);
+        auto *layout = new QVBoxLayout(widget);
+
+        m_input = new QLineEdit(this);
+        m_input->setPlaceholderText("Enter MIDI note (e.g., D3)");
+        layout->addWidget(m_input);
+
+        auto *sendButton = new QPushButton("Send MIDI Note", this);
+        layout->addWidget(sendButton);
+
+        m_output = new QTextEdit(this);
+        m_output->setReadOnly(true);
+        layout->addWidget(m_output);
+
+        setCentralWidget(widget);
+        setWindowTitle("MIDI Client GUI");
+
+        // Setup ZeroMQ
+        m_pusher = m_context->createSocket(nzmqt::ZMQSocket::TYP_PUSH, m_context);
+        m_pusher->connectTo("tcp://benternet.pxl-ea-ict.be:24041");
+
+        m_subscriber = m_context->createSocket(nzmqt::ZMQSocket::TYP_SUB, m_context);
+        connect(m_subscriber, &nzmqt::ZMQSocket::messageReceived, this, &MidiClientGUI::onMessageReceived);
+        m_subscriber->connectTo("tcp://benternet.pxl-ea-ict.be:24042");
+        m_subscriber->subscribeTo("MIDISignal");
+
+        // Connect input
+        connect(sendButton, &QPushButton::clicked, this, &MidiClientGUI::onSendClicked);
     }
 
-public slots:
-    void onUserInput(const QString &MIDINote)
+private slots:
+    void onSendClicked()
     {
-        if (MIDINote.isEmpty()) {
-            std::cout << "Exiting application..." << std::endl;
-            QCoreApplication::quit();
-            return;
-        }
+        QString MIDINote = m_input->text().trimmed();
+        if (MIDINote.isEmpty()) return;
 
-        // Format: "MIDISignal>{input}>APCMini>"
         QString msg = "MIDISignal>" + MIDINote + ">APCMini>";
         nzmqt::ZMQMessage message(msg.toUtf8());
         m_pusher->sendMessage(message);
 
-        std::cout << "Verzonden: " << msg.toStdString() << std::endl;
+        m_output->append("Sent: " + msg);
+        m_input->clear();
     }
 
-private slots:
     void onMessageReceived(const QList<QByteArray> &messages)
     {
-        for (const QByteArray &msgData : messages) {
-            QString response = QString::fromUtf8(msgData);
-            std::cout << "Ontvangen: " << response.toStdString() << std::endl;
+        for (const QByteArray &msg : messages) {
+            m_output->append("Received: " + QString::fromUtf8(msg));
         }
     }
 
 private:
+    QLineEdit *m_input;
+    QTextEdit *m_output;
+    nzmqt::ZMQContext *m_context;
     nzmqt::ZMQSocket *m_pusher;
     nzmqt::ZMQSocket *m_subscriber;
 };
 
+#include "main.moc"
+
 int main(int argc, char *argv[])
 {
-    QCoreApplication app(argc, argv);
-    std::cout << "Start communicatie met benternet..." << std::endl;
-
-    try {
-        nzmqt::ZMQContext *context = nzmqt::createDefaultContext(&app);
-
-        nzmqt::ZMQSocket *pusher = context->createSocket(nzmqt::ZMQSocket::TYP_PUSH, context);
-        pusher->connectTo("tcp://benternet.pxl-ea-ict.be:24041");
-
-        nzmqt::ZMQSocket *subscriber = context->createSocket(nzmqt::ZMQSocket::TYP_SUB, context);
-        subscriber->connectTo("tcp://benternet.pxl-ea-ict.be:24042");
-        subscriber->subscribeTo("MIDISignal");
-
-        MidiClient client(pusher, subscriber);
-        InputReader inputReader;
-
-        QObject::connect(&inputReader, &InputReader::inputReceived,
-                         &client, &MidiClient::onUserInput,
-                         Qt::QueuedConnection);
-
-        inputReader.start();
-
-        int ret = app.exec();
-        inputReader.stop();
-        return ret;
-    }
-    catch (nzmqt::ZMQException &ex) {
-        std::cerr << "Exception gevangen: " << ex.what() << std::endl;
-        return 1;
-    }
+    QApplication app(argc, argv);
+    MidiClientGUI window;
+    window.resize(400, 300);
+    window.show();
+    return app.exec();
 }
-
-#include "main.moc"
