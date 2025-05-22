@@ -1,0 +1,18 @@
+# ninja log v6
+42	185	7691027992376435	RtMidi_autogen/timestamp	ca08da437db1d7ac
+42	185	7691027992376435	RtMidi_autogen/mocs_compilation.cpp	ca08da437db1d7ac
+227	2697	7691017922334321	CMakeFiles/RtMidi.dir/RtMidi.cpp.obj	751e939c76e383c7
+42	185	7691027992376435	C:/School/Academiejaar_2024-25/networkProgramming/rtMidi/rtMidi2/RtMidi/build/Desktop_Qt_6_8_2_llvm_mingw_64_bit-Debug/RtMidi_autogen/timestamp	ca08da437db1d7ac
+42	185	7691027992376435	C:/School/Academiejaar_2024-25/networkProgramming/rtMidi/rtMidi2/RtMidi/build/Desktop_Qt_6_8_2_llvm_mingw_64_bit-Debug/RtMidi_autogen/mocs_compilation.cpp	ca08da437db1d7ac
+219	306	7691017922246388	CMakeFiles/RtMidi.dir/RtMidi_autogen/mocs_compilation.cpp.obj	36c6c3d80536eff0
+155	214	7691016514334229	CMakeFiles/RtMidi.dir/RtMidiOut.cpp.obj	dc159d8943315dc7
+1353	1487	7691028005473298	RtMidi.exe	532ebdfc40e1b6ee
+186	1352	7691027993807220	CMakeFiles/RtMidi.dir/RtMidiIn.cpp.obj	9f5674fe270e0852
+30	79	7691017826732696	CMakeFiles/clean.additional	baedbe210acaa455
+80	95	7691017827240501	clean	577b940aee94fbd7
+42	219	7696488977249940	RtMidi_autogen/timestamp	ca08da437db1d7ac
+42	219	7696488977249940	RtMidi_autogen/mocs_compilation.cpp	ca08da437db1d7ac
+42	219	7696488977249940	C:/School/Academiejaar_2024-25/networkProgramming/rtMidi/rtMidi2/RtMidi/build/Desktop_Qt_6_8_2_llvm_mingw_64_bit-Debug/RtMidi_autogen/timestamp	ca08da437db1d7ac
+42	219	7696488977249940	C:/School/Academiejaar_2024-25/networkProgramming/rtMidi/rtMidi2/RtMidi/build/Desktop_Qt_6_8_2_llvm_mingw_64_bit-Debug/RtMidi_autogen/mocs_compilation.cpp	ca08da437db1d7ac
+220	1590	7696488979037055	CMakeFiles/RtMidi.dir/RtMidiIn.cpp.obj	9f5674fe270e0852
+1590	1752	7696488992733530	RtMidi.exe	532ebdfc40e1b6ee
